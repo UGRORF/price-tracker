@@ -24,9 +24,18 @@ func main() {
 	}
 	defer db.Close()
 
-	// Handler
+	// Handlers
 	userRepo := postgres.NewUserRepo(db)
 	handlers.InitUserRepo(userRepo)
+
+	storeRepo := postgres.NewStoreRepo(db)
+	handlers.InitStoreRepo(storeRepo)
+
+	productRepo := postgres.NewProductRepo(db)
+	handlers.InitProductRepo(productRepo)
+
+	offerRepo := postgres.NewOfferRepo(db)
+	handlers.InitOfferRepo(offerRepo)
 
 	logger.Printf("Connected to database %s on %s:%d",
 		cfg.Database.Name, cfg.Database.Host, cfg.Database.Port)

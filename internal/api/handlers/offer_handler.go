@@ -10,15 +10,15 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-var userRepo *postgres.UserRepo
+var offerRepo *postgres.OfferRepo
 
-func InitUserRepo(repo *postgres.UserRepo) {
-	userRepo = repo
+func InitOfferRepo(repo *postgres.OfferRepo) {
+	offerRepo = repo
 }
 
-func GetUser(w http.ResponseWriter, r *http.Request) {
-	if userRepo == nil {
-		http.Error(w, "User repository not initialized", http.StatusInternalServerError)
+func GetOffer(w http.ResponseWriter, r *http.Request) {
+	if offerRepo == nil {
+		http.Error(w, "Offer repository not initialized", http.StatusInternalServerError)
 		return
 	}
 
@@ -29,16 +29,15 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := userRepo.GetByID(id)
+	offer, err := offerRepo.GetByID(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		http.Error(w, "Offer not found", http.StatusNotFound)
 		return
 	}
 
-	out, err := json.Marshal(user)
+	out, err := json.Marshal(offer)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error with serialization in JSON: %s", err.Error()), http.StatusInternalServerError)
-		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -46,22 +45,21 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	w.Write(out)
 }
 
-func GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	if userRepo == nil {
-		http.Error(w, "User repository not initialized", http.StatusInternalServerError)
+func GetOffers(w http.ResponseWriter, r *http.Request) {
+	if offerRepo == nil {
+		http.Error(w, "Offer repository not initialized", http.StatusInternalServerError)
 		return
 	}
 
-	users, err := userRepo.GetAll()
+	offers, err := offerRepo.GetAll()
 	if err != nil {
-		http.Error(w, "Failed to get users: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Offer not founds", http.StatusNotFound)
 		return
 	}
 
-	out, err := json.Marshal(users)
+	out, err := json.Marshal(offers)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error with serialization in JSON: %s", err.Error()), http.StatusInternalServerError)
-		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")

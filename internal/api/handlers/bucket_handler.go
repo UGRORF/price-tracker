@@ -10,15 +10,15 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-var userRepo *postgres.UserRepo
+var bucketRepo *postgres.BucketRepo
 
-func InitUserRepo(repo *postgres.UserRepo) {
-	userRepo = repo
+func InitBucketRepo(repo *postgres.BucketRepo) {
+	bucketRepo = repo
 }
 
-func GetUser(w http.ResponseWriter, r *http.Request) {
-	if userRepo == nil {
-		http.Error(w, "User repository not initialized", http.StatusInternalServerError)
+func GetBucket(w http.ResponseWriter, r *http.Request) {
+	if bucketRepo == nil {
+		http.Error(w, "Bucket repository not initialized", http.StatusInternalServerError)
 		return
 	}
 
@@ -29,16 +29,15 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := userRepo.GetByID(id)
+	bucket, err := bucketRepo.GetByID(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		http.Error(w, "Bucket not found", http.StatusNotFound)
 		return
 	}
 
-	out, err := json.Marshal(user)
+	out, err := json.Marshal(bucket)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error with serialization in JSON: %s", err.Error()), http.StatusInternalServerError)
-		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -46,25 +45,32 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	w.Write(out)
 }
 
-func GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	if userRepo == nil {
-		http.Error(w, "User repository not initialized", http.StatusInternalServerError)
+func GetBuckets(w http.ResponseWriter, r *http.Request) {
+	if bucketRepo == nil {
+		http.Error(w, "Bucket repository not initialized", http.StatusInternalServerError)
 		return
 	}
 
-	users, err := userRepo.GetAll()
+	buckets, err := bucketRepo.GetAll()
 	if err != nil {
-		http.Error(w, "Failed to get users: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Buckets not founds", http.StatusNotFound)
 		return
 	}
 
-	out, err := json.Marshal(users)
+	out, err := json.Marshal(buckets)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error with serialization in JSON: %s", err.Error()), http.StatusInternalServerError)
-		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(out)
+}
+
+func AddBucket(w http.ResponseWriter, r *http.Request) {
+	if bucketRepo == nil {
+		http.Error(w, "Bucket repository not initialized", http.StatusInternalServerError)
+		return
+	}
+
 }

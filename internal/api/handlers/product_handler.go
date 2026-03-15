@@ -10,15 +10,15 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-var userRepo *postgres.UserRepo
+var productRepo *postgres.ProductRepo
 
-func InitUserRepo(repo *postgres.UserRepo) {
-	userRepo = repo
+func InitProductRepo(repo *postgres.ProductRepo) {
+	productRepo = repo
 }
 
-func GetUser(w http.ResponseWriter, r *http.Request) {
-	if userRepo == nil {
-		http.Error(w, "User repository not initialized", http.StatusInternalServerError)
+func GetProduct(w http.ResponseWriter, r *http.Request) {
+	if productRepo == nil {
+		http.Error(w, "Product repository not initialized", http.StatusInternalServerError)
 		return
 	}
 
@@ -29,16 +29,15 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := userRepo.GetByID(id)
+	product, err := productRepo.GetById(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		http.Error(w, "Product not found", http.StatusNotFound)
 		return
 	}
 
-	out, err := json.Marshal(user)
+	out, err := json.Marshal(product)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error with serialization in JSON: %s", err.Error()), http.StatusInternalServerError)
-		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -46,19 +45,19 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	w.Write(out)
 }
 
-func GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	if userRepo == nil {
-		http.Error(w, "User repository not initialized", http.StatusInternalServerError)
+func GetAllProducts(w http.ResponseWriter, r *http.Request) {
+	if productRepo == nil {
+		http.Error(w, "Product repository not initialized", http.StatusInternalServerError)
 		return
 	}
 
-	users, err := userRepo.GetAll()
+	products, err := productRepo.GetAll()
 	if err != nil {
-		http.Error(w, "Failed to get users: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Failed to get products: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	out, err := json.Marshal(users)
+	out, err := json.Marshal(products)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error with serialization in JSON: %s", err.Error()), http.StatusInternalServerError)
 		return

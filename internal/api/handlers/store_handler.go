@@ -10,15 +10,15 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-var userRepo *postgres.UserRepo
+var storeRepo *postgres.StoreRepo
 
-func InitUserRepo(repo *postgres.UserRepo) {
-	userRepo = repo
+func InitStoreRepo(repo *postgres.StoreRepo) {
+	storeRepo = repo
 }
 
-func GetUser(w http.ResponseWriter, r *http.Request) {
-	if userRepo == nil {
-		http.Error(w, "User repository not initialized", http.StatusInternalServerError)
+func GetStore(w http.ResponseWriter, r *http.Request) {
+	if storeRepo == nil {
+		http.Error(w, "Store repository not initialized", http.StatusInternalServerError)
 		return
 	}
 
@@ -29,13 +29,13 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := userRepo.GetByID(id)
+	store, err := storeRepo.GetById(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		http.Error(w, "Store not found", http.StatusNotFound)
 		return
 	}
 
-	out, err := json.Marshal(user)
+	out, err := json.Marshal(store)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error with serialization in JSON: %s", err.Error()), http.StatusInternalServerError)
 		return
@@ -46,19 +46,19 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	w.Write(out)
 }
 
-func GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	if userRepo == nil {
-		http.Error(w, "User repository not initialized", http.StatusInternalServerError)
+func GetAllStores(w http.ResponseWriter, r *http.Request) {
+	if storeRepo == nil {
+		http.Error(w, "Store repository not initialized", http.StatusInternalServerError)
 		return
 	}
 
-	users, err := userRepo.GetAll()
+	stores, err := storeRepo.GetAll()
 	if err != nil {
-		http.Error(w, "Failed to get users: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Failed to get stores: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	out, err := json.Marshal(users)
+	out, err := json.Marshal(stores)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error with serialization in JSON: %s", err.Error()), http.StatusInternalServerError)
 		return

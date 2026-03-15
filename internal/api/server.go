@@ -4,6 +4,9 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/UGRORF/price-tracker/internal/api/handlers"
+	"github.com/UGRORF/price-tracker/internal/service/auth"
 )
 
 type Server struct {
@@ -11,8 +14,10 @@ type Server struct {
 	httpServer *http.Server
 }
 
-func NewServer(logger *log.Logger) *Server {
-	r := RouterInit()
+func NewServer(logger *log.Logger,
+	authHandler *handlers.AuthHandler,
+	jwtService *auth.JWTService) *Server {
+	r := RouterInit(authHandler, jwtService)
 
 	logger.Println("Server initialized")
 

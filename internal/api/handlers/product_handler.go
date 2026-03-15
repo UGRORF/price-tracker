@@ -18,7 +18,7 @@ func InitProductRepo(repo *postgres.ProductRepo) {
 
 func GetProduct(w http.ResponseWriter, r *http.Request) {
 	if productRepo == nil {
-		http.Error(w, "Store repository not initialized", http.StatusInternalServerError)
+		http.Error(w, "Product repository not initialized", http.StatusInternalServerError)
 		return
 	}
 
@@ -47,7 +47,7 @@ func GetProduct(w http.ResponseWriter, r *http.Request) {
 
 func GetAllProducts(w http.ResponseWriter, r *http.Request) {
 	if productRepo == nil {
-		http.Error(w, "Store repository not initialized", http.StatusInternalServerError)
+		http.Error(w, "Product repository not initialized", http.StatusInternalServerError)
 		return
 	}
 

@@ -18,7 +18,7 @@ func InitOfferRepo(repo *postgres.OfferRepo) {
 
 func GetOffer(w http.ResponseWriter, r *http.Request) {
 	if offerRepo == nil {
-		http.Error(w, "Store repository not initialized", http.StatusInternalServerError)
+		http.Error(w, "Offer repository not initialized", http.StatusInternalServerError)
 		return
 	}
 
@@ -36,6 +36,28 @@ func GetOffer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	out, err := json.Marshal(offer)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error with serialization in JSON: %s", err.Error()), http.StatusInternalServerError)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(out)
+}
+
+func GetOffers(w http.ResponseWriter, r *http.Request) {
+	if offerRepo == nil {
+		http.Error(w, "Offer repository not initialized", http.StatusInternalServerError)
+		return
+	}
+
+	offers, err := offerRepo.GetAll()
+	if err != nil {
+		http.Error(w, "Offer not founds", http.StatusNotFound)
+		return
+	}
+
+	out, err := json.Marshal(offers)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error with serialization in JSON: %s", err.Error()), http.StatusInternalServerError)
 	}

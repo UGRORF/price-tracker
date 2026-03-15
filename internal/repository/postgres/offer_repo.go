@@ -12,9 +12,7 @@ type OfferRepo struct {
 }
 
 func NewOfferRepo(db *sql.DB) *OfferRepo {
-	return &OfferRepo{
-		db: db,
-	}
+	return &OfferRepo{db: db}
 }
 
 // TODO: доделать вставку цены напрямую из ссылки на магазин(карточку товара)
@@ -61,4 +59,41 @@ func (r *OfferRepo) GetByID(id int64) (*domain.Offer, error) {
 	offer.Store = store
 
 	return offer, nil
+}
+
+func (r *OfferRepo) GetAll() ([]domain.Offer, error) {
+	query := `
+		SELECT 
+            o.id, o.product_id, o.store_id, o.price,
+            p.id, p.name, p.description,
+			s.id, s.name, s.url
+        FROM offers o
+        JOIN products p ON o.product_id = p.id
+        JOIN stores s ON o.store_id = s.id
+		`
+
+	var offers []domain.Offer
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to get offers from DataBase: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		offer := domain.Offer{}
+		product := &domain.Product{}
+		store := &domain.Store{}
+		err := rows.Scan(&offer.ID, &offer.ProductID, &offer.StoreID, &offer.Price,
+			&product.ID, &product.Name, &product.Description,
+			&store.ID, &store.Name, &store.URL)
+		if err != nil {
+			return nil, fmt.Errorf("Error iterating offers %w", err)
+		}
+
+		offer.Product = product
+		offer.Store = store
+		offers = append(offers, offer)
+	}
+
+	return offers, nil
 }

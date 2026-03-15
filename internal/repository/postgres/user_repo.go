@@ -16,13 +16,17 @@ func NewUserRepo(db *sql.DB) *UserRepo {
 }
 
 func (r *UserRepo) Create(user *domain.User) error {
+	if !user.IsValidRole() {
+		return fmt.Errorf("Not valid role")
+	}
+
 	query := `
-		INSERT INTO users (username, password)
-		VALUES ($1, $2) 
+		INSERT INTO users (username, password, role)
+		VALUES ($1, $2, $3) 
 		RETURNING id
 		`
 
-	err := r.db.QueryRow(query, user.Username, user.Password).Scan(&user.ID)
+	err := r.db.QueryRow(query, user.Username, user.Password, user.Role).Scan(&user.ID)
 	if err != nil {
 		return fmt.Errorf("Failed to create user in DataBase: %w", err)
 	}
@@ -32,15 +36,18 @@ func (r *UserRepo) Create(user *domain.User) error {
 
 func (r *UserRepo) GetByID(id int64) (*domain.User, error) {
 	query := `
-		SELECT id, username, password 
+		SELECT id, username, password, role
 		from users 
 		WHERE id = $1
 		`
 	user := &domain.User{}
-	err := r.db.QueryRow(query, id).Scan(&user.ID, &user.Username, &user.Password)
 
+	err := r.db.QueryRow(query, id).Scan(&user.ID, &user.Username, &user.Password, &user.Role)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to get user from DataBase: %w", err)
+	}
+	if !user.IsValidRole() {
+		return nil, fmt.Errorf("Not valid role")
 	}
 
 	return user, nil
@@ -48,22 +55,26 @@ func (r *UserRepo) GetByID(id int64) (*domain.User, error) {
 
 func (r *UserRepo) GetByUsername(username string) (*domain.User, error) {
 	query := `
-		SELECT id, username, password
+		SELECT id, username, password, role
 		from users
 		WHERE username = $1
 		`
 
 	user := &domain.User{}
-	err := r.db.QueryRow(query, username).Scan(&user.ID, &user.Username, &user.Password)
+	err := r.db.QueryRow(query, username).Scan(&user.ID, &user.Username, &user.Password, &user.Role)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to get user from DataBase: %w", err)
 	}
+	if !user.IsValidRole() {
+		return nil, fmt.Errorf("Not valid role")
+	}
+
 	return user, nil
 }
 
 func (r *UserRepo) GetAll() ([]domain.User, error) {
 	query := `
-		SELECT id, username
+		SELECT id, username, role
 		FROM users
 	`
 
@@ -76,11 +87,14 @@ func (r *UserRepo) GetAll() ([]domain.User, error) {
 	var users []domain.User
 	for rows.Next() {
 		var user domain.User
-		err := rows.Scan(&user.ID, &user.Username)
+		err := rows.Scan(&user.ID, &user.Username, &user.Role)
 		if err != nil {
 			return nil, fmt.Errorf("error iterating users: %w", err)
 		}
 
+		if !user.IsValidRole() {
+			continue
+		}
 		users = append(users, user)
 	}
 

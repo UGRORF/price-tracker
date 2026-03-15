@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/UGRORF/price-tracker/internal/api/middleware"
+	"github.com/UGRORF/price-tracker/internal/domain"
 	"github.com/UGRORF/price-tracker/internal/repository/postgres"
 	"github.com/go-chi/chi/v5"
 )
@@ -46,6 +48,17 @@ func GetProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllProducts(w http.ResponseWriter, r *http.Request) {
+	role, ok := middleware.GetUserRole(r.Context())
+	if !ok {
+		http.Error(w, `{"error": "unauthorized"}`, http.StatusUnauthorized)
+		return
+	}
+
+	if role != string(domain.RoleAdmin) {
+		http.Error(w, `{"error": "forbidden: admin rights required"}`, http.StatusForbidden)
+		return
+	}
+
 	if productRepo == nil {
 		http.Error(w, "Product repository not initialized", http.StatusInternalServerError)
 		return

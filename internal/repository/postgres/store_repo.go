@@ -39,6 +39,9 @@ func (r *StoreRepo) GetById(id int64) (*domain.Store, error) {
 	store := &domain.Store{}
 	err := r.db.QueryRow(query, id).Scan(&store.ID, &store.Name, &store.URL)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, sql.ErrNoRows
+		}
 		return nil, fmt.Errorf("Failed to get store from DataBase: %w", err)
 	}
 
@@ -54,6 +57,27 @@ func (r *StoreRepo) GetByName(name string) (*domain.Store, error) {
 	store := &domain.Store{}
 	err := r.db.QueryRow(query, name).Scan(&store.ID, &store.Name, &store.URL)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, sql.ErrNoRows
+		}
+		return nil, fmt.Errorf("Failed to get store from DataBase: %w", err)
+	}
+
+	return store, nil
+}
+
+func (r *StoreRepo) GetByURL(url string) (*domain.Store, error) {
+	query := `
+		SELECT id, name, url
+		FROM stores
+		WHERE url = $1
+		`
+	store := &domain.Store{}
+	err := r.db.QueryRow(query, url).Scan(&store.ID, &store.Name, &store.URL)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, sql.ErrNoRows
+		}
 		return nil, fmt.Errorf("Failed to get store from DataBase: %w", err)
 	}
 

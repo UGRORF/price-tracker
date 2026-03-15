@@ -19,11 +19,15 @@ func RouterInit(authHandler *handlers.AuthHandler,
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.AuthMiddleware(jwtService))
 
+		r.Get("/api/bucket/{id}", handlers.GetBucketByUserID)
+		r.Get("/api/buckets", handlers.GetAllBucketsByUserID)
+		r.Post("/api/addbucket", handlers.AddBucket)
+
 		r.Get("/api/stores", handlers.GetAllStores)
 		r.Get("/api/store/{id}", handlers.GetStore)
 		r.Get("/api/products", handlers.GetAllProducts)
 		r.Get("/api/product/{id}", handlers.GetProduct)
-		r.Get("/api/offers", handlers.GetOffers)
+		r.Get("/api/offers", handlers.GetAllOffers)
 		r.Get("/api/offer/{id}", handlers.GetOffer)
 	})
 

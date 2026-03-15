@@ -44,6 +44,9 @@ func (r *UserRepo) GetByID(id int64) (*domain.User, error) {
 
 	err := r.db.QueryRow(query, id).Scan(&user.ID, &user.Username, &user.Password, &user.Role)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, sql.ErrNoRows
+		}
 		return nil, fmt.Errorf("Failed to get user from DataBase: %w", err)
 	}
 	if !user.IsValidRole() {
@@ -63,6 +66,9 @@ func (r *UserRepo) GetByUsername(username string) (*domain.User, error) {
 	user := &domain.User{}
 	err := r.db.QueryRow(query, username).Scan(&user.ID, &user.Username, &user.Password, &user.Role)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, sql.ErrNoRows
+		}
 		return nil, fmt.Errorf("Failed to get user from DataBase: %w", err)
 	}
 	if !user.IsValidRole() {

@@ -52,6 +52,9 @@ func (r *OfferRepo) GetByID(id int64) (*domain.Offer, error) {
 		&product.ID, &product.Name, &product.Description,
 		&store.ID, &store.Name, &store.URL)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, sql.ErrNoRows
+		}
 		return nil, fmt.Errorf("Failed to get offer from DataBase: %w", err)
 	}
 

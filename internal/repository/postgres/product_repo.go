@@ -39,6 +39,9 @@ func (r *ProductRepo) GetById(id int64) (*domain.Product, error) {
 	product := &domain.Product{}
 	err := r.db.QueryRow(query, id).Scan(&product.ID, &product.Name, &product.Description)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, sql.ErrNoRows
+		}
 		return nil, fmt.Errorf("Failed to get product from DataBase: %w", err)
 	}
 
@@ -54,6 +57,9 @@ func (r *ProductRepo) GetByName(name string) (*domain.Product, error) {
 	product := &domain.Product{}
 	err := r.db.QueryRow(query, name).Scan(&product.ID, &product.Name, &product.Description)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, sql.ErrNoRows
+		}
 		return nil, fmt.Errorf("Failed to get product from DataBase: %w", err)
 	}
 
